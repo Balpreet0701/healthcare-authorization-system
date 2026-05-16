@@ -1,0 +1,14 @@
+bin/
+obj/
+dist/
+node_modules/
+.vs/
+.vscode/
+*.user
+*.suo
+logs/
+uploads/
+*.db
+*.bak
+ClientApp/.env.local
+src/HealthcareAuth.Api/appsettings.Local.json

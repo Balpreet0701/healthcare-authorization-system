@@ -1,0 +1,62 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+    ports:
+      - "14333:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  api:
+    build:
+      context: .
+      dockerfile: src/HealthcareAuth.Api/Dockerfile
+    depends_on:
+      - sqlserver
+      - rabbitmq
+      - ollama
+    environment:
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=HealthcareAuthDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=True"
+      RabbitMq__Enabled: "true"
+      RabbitMq__HostName: "rabbitmq"
+      Ollama__Enabled: "true"
+      Ollama__BaseUrl: "http://ollama:11434"
+      Ollama__Model: "llama3"
+    ports:
+      - "8080:8080"
+    volumes:
+      - api-uploads:/app/uploads
+      - api-logs:/app/logs
+
+  client:
+    build:
+      context: .
+      dockerfile: ClientApp/Dockerfile
+      args:
+        VITE_API_URL: "http://localhost:8080"
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+
+volumes:
+  sqlserver-data:
+  ollama-data:
+  api-uploads:
+  api-logs:
