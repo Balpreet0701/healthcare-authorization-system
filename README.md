@@ -77,6 +77,8 @@ Client:
 http://localhost:5173
 ```
 
+If the ASP.NET Core backend is not running, the React app falls back to built-in demo data so you can preview the UI screens locally.
+
 ## Ollama and Tesseract
 
 Install and run Ollama, then pull Llama3:
